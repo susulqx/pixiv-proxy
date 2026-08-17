@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/pixiv-app-api", "destination": "/api/pixiv-app-api" },
+    { "source": "/pixiv-app-api/(.*)", "destination": "/api/pixiv-app-api/$1" },
+    { "source": "/pixiv-oauth", "destination": "/api/pixiv-oauth" },
+    { "source": "/pixiv-oauth/(.*)", "destination": "/api/pixiv-oauth/$1" },
+    { "source": "/pximg", "destination": "/api/pximg" },
+    { "source": "/pximg/(.*)", "destination": "/api/pximg/$1" }
+  ]
+}
