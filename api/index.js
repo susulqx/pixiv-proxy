@@ -39,11 +39,12 @@ const FORWARD_HEADERS = ['Authorization', 'Content-Type', 'X-Client-Time', 'X-Cl
 
 export default async function handler(req) {
   const url = new URL(req.url)
-  let path = url.pathname
-
-  // Vercel 将函数挂在 /api 下，剥掉可选的 /api 前缀
-  if (path.startsWith('/api/')) path = path.slice(4)
-  else if (path === '/api') path = '/'
+  // 路径经 vercel.json rewrite 以查询参数 p= 传入（规避 Vercel api/ 仅单段路由的限制）
+  let path = url.searchParams.get('p')
+  if (!path) {
+    // 兜底：直接访问 /api 时按 pathname 处理
+    path = url.pathname === '/api' ? '/' : url.pathname.replace(/^\/api\//, '')
+  }
 
   // CORS 预检：全局返回 204（对齐 pxve 的 cors()）
   if (req.method === 'OPTIONS') {
@@ -76,7 +77,11 @@ export default async function handler(req) {
     )
   }
 
-  const targetUrl = `https://${targetHost}${upstreamPath}${url.search}`
+  // 重建上游 URL：去掉代理内部用的 p 参数，仅保留客户端原始查询
+  const params = new URLSearchParams(url.search)
+  params.delete('p')
+  const queryStr = params.toString()
+  const targetUrl = `https://${targetHost}${upstreamPath}${queryStr ? '?' + queryStr : ''}`
 
   // 回源头 = pxve PIXIV_API_HEADERS + 入站请求原样转发（不覆盖 Host/Referer）
   const headers = new Headers()
@@ -106,7 +111,10 @@ async function handleImage(url, path) {
   const imgPath = path.replace('/pximg', '') || '/'
   if (imgPath === '/') return json({ error: 'Image path required' }, 400)
 
-  const targetUrl = `https://${PIXIV_IMG_HOST}${imgPath}${url.search}`
+  const params = new URLSearchParams(url.search)
+  params.delete('p')
+  const q = params.toString()
+  const targetUrl = `https://${PIXIV_IMG_HOST}${imgPath}${q ? '?' + q : ''}`
 
   const headers = new Headers()
   headers.set('Referer', PIXIV_REFERER)
