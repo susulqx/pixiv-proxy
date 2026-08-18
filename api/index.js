@@ -14,7 +14,7 @@ export const config = { runtime: 'edge' }
 
 // ========== 可配置项 ==========
 const ENABLE_API_PROXY = true    // App API 反代（对应 pxve /pixiv-app-api）
-const ENABLE_IMAGE_PROXY = true  // 图片反代（对应 pxve /pximg）
+const ENABLE_IMAGE_PROXY = false  // 图片反代（对应 pxve /pximg）
 const ENABLE_OAUTH_PROXY = true  // OAuth 反代（对应 pxve /pixiv-oauth；Shaft 刷新 token 需要）
 
 // ========== Pixiv 服务主机 ==========
